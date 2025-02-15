@@ -1,0 +1,16 @@
+﻿@model RecipesApp.Models.Recipe
+
+<h2>@Model.Name</h2>
+
+<h3>Ingredients</h3>
+<ul>
+    @foreach (var recipeIngredient in Model.RecipeIngredients)
+    {
+        <li>@recipeIngredient.Ingredient.Name - @recipeIngredient.Quantity @recipeIngredient.Unit</li>
+    }
+</ul>
+<p><strong>Cooking Time:</strong> @Model.Time minutes</p>
+
+<h3>Instructions</h3>
+<p>@Model.Instructions</p>
+

@@ -1,0 +1,47 @@
+﻿@model RecipesApp.Models.Recipe
+
+<h2>Add Recipe</h2>
+
+<form asp-action="Create">
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Instructions"></label>
+        <textarea asp-for="Instructions" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Time"></label>
+        <input asp-for="Time" type="number" class="form-control" required />
+    </div>
+
+    <h3>Ingredients</h3>
+    <div id="ingredients-container">
+        <div class="ingredient-group">
+            <select name="ingredientIds[]" class="form-control">
+                @foreach (var ingredient in ViewBag.Ingredients)
+                {
+                    <option value="@ingredient.Id">@ingredient.Name</option>
+                }
+            </select>
+            <input type="number" name="quantities[]" placeholder="Quantity" class="form-control" required />
+            <input type="text" name="units[]" placeholder="Unit" class="form-control" required />
+        </div>
+    </div>
+
+    <button type="button" id="add-ingredient" class="btn btn-secondary">Add Ingredient</button>
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
+
+<script>
+    document.getElementById('add-ingredient').addEventListener('click', function () {
+        var container = document.getElementById('ingredients-container');
+        var newIngredient = document.createElement('div');
+        newIngredient.classList.add('ingredient-group');
+        newIngredient.innerHTML = container.children[0].innerHTML;
+        container.appendChild(newIngredient);
+    });
+</script>

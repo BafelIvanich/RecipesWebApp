@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RecipesApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RecipesApp.styles.css" asp-append-version="true" />
+
+    <style>
+        header {
+            position: relative;
+        }
+
+        #searchMenu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #ffffff;
+            padding: 15px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            transition: all 0.3s ease-out;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+        }
+
+            #searchMenu.show {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+
+        .advanced-search-button {
+            margin-left: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .advanced-search-button:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <!-- Navbar content remains the same -->
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logot.png" alt="RecipesApp" height="40" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="javascript:void(0);" id="searchButton" aria-expanded="false" aria-controls="searchMenu">
+                                <i class="bi bi-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Moved search menu inside header -->
+        <div id="searchMenu" class="search-menu" aria-hidden="true">
+            <form class="form-inline" action="@Url.Action("Search", "Recipes")" method="get">
+                <div style="display: flex; align-items: center;">
+                    <input type="text" class="form-control" name="searchQuery" placeholder="Search recipes..." id="searchInput" />
+                    <a href="@Url.Action("AdvancedSearch", "Recipes")" class="advanced-search-button">
+                        Advanced Search
+                    </a>
+                </div>
+                <div id="ingredientSelection" style="margin-top: 10px;">
+                </div>
+            </form>
+        </div>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - RecipesApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        // Toggle search menu
+        document.getElementById("searchButton").onclick = function() {
+            const searchMenu = document.getElementById("searchMenu");
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+            this.setAttribute('aria-expanded', !isExpanded);
+            searchMenu.classList.toggle("show");
+            searchMenu.setAttribute('aria-hidden', isExpanded);
+
+            if (!isExpanded) {
+                document.getElementById("searchInput").focus();
+            }
+        };
+
+        // Handle Enter key in search input
+        document.getElementById("searchInput").onkeydown = function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                event.target.form.submit();
+            }
+        };
+
+        // Close menu when clicking outside
+        window.onclick = function(event) {
+            const searchMenu = document.getElementById("searchMenu");
+            const searchButton = document.getElementById("searchButton");
+
+            if (!searchMenu.contains(event.target) && event.target !== searchButton) {
+                searchMenu.classList.remove("show");
+                searchButton.setAttribute('aria-expanded', 'false');
+                searchMenu.setAttribute('aria-hidden', 'true');
+            }
+        };
+    </script>
+</body>
+</html>
