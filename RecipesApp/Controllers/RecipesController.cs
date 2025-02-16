@@ -46,28 +46,45 @@ namespace RecipesApp.Controllers
             return View(recipe);
         }
 
-        // GET: Recipes/Create
-        public async Task<IActionResult> Create()
+        public IActionResult Search(string query, int? cookingTime, List<int> ingredientIds, List<double> ingredientQuantities)
         {
-            ViewBag.Ingredients = await _context.Ingredients.ToListAsync();
+            var model = new RecipeSearchViewModel
+            {
+                Name = query,
+                Time = cookingTime ?? 0,
+                SelectedIngredients = new List<IngredientSelection>() // Ensure this is always initialized
+            };
+
+            if (ingredientIds != null && ingredientQuantities != null)
+            {
+                for (int i = 0; i < ingredientIds.Count; i++)
+                {
+                    var ingredient = _context.Ingredients.FirstOrDefault(ing => ing.Id == ingredientIds[i]);
+                    if (ingredient != null)
+                    {
+                        
+                    }
+                }
+            }
+
+            return View(model); // Always pass a valid model
+        }
+
+
+
+        [HttpGet]
+        public IActionResult Create()
+        {
             return View();
         }
 
-        // POST: Recipes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Instructions,Time")] Recipe recipe)
+        public IActionResult Create(RecipeSearchViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(recipe);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(recipe);
+            
+            return View(model);
         }
+
 
         // GET: Recipes/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -84,6 +101,20 @@ namespace RecipesApp.Controllers
             }
             return View(recipe);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchIngredients(string term)
+        {
+            var ingredients = await _context.Ingredients
+                .Where(i => i.Name.Contains(term.ToLower()))
+                .OrderBy(i => i.Name)
+                .Select(i => i.Name)
+                .Take(10)
+                .ToListAsync();
+
+            return Ok(ingredients);
+        }
+
 
         // POST: Recipes/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -156,5 +187,12 @@ namespace RecipesApp.Controllers
         {
             return _context.Recipes.Any(e => e.Id == id);
         }
+
+        public IActionResult ViewIngredients()
+        {
+            var ingredients = _context.Ingredients.ToList();
+            return View(ingredients);
+        }
+
     }
 }

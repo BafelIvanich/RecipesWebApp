@@ -23,6 +23,7 @@ namespace RecipesApp.Data
                 .HasOne(ri => ri.Ingredient)
                 .WithMany(i => i.RecipeIngredients)
                 .HasForeignKey(ri => ri.IngredientId);
+
         }
     }
 }

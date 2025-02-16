@@ -1,0 +1,23 @@
+﻿@model List<Ingredient>
+
+<h2>Ingredient List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Unit</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ingredient in Model)
+        {
+            <tr>
+                <td>@ingredient.Id</td>
+                <td>@ingredient.Name</td>
+                <td>@ingredient.Unit</td>
+            </tr>
+        }
+    </tbody>
+</table>
