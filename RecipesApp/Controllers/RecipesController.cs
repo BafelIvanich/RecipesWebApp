@@ -46,28 +46,61 @@ namespace RecipesApp.Controllers
             return View(recipe);
         }
 
-        public IActionResult Search(string query, int? cookingTime, List<int> ingredientIds, List<double> ingredientQuantities)
+        public IActionResult Search(string query,
+            int? cookingTime,
+            List<string> ingredients)
         {
             var model = new RecipeSearchViewModel
             {
                 Name = query,
                 Time = cookingTime ?? 0,
-                SelectedIngredients = new List<IngredientSelection>() // Ensure this is always initialized
+                SelectedIngredients = ingredients?.Select(i => new IngredientSelection { Name = i}).ToList()
+                ?? new List<IngredientSelection>()
             };
 
-            if (ingredientIds != null && ingredientQuantities != null)
+            var recipeQuery = _context.Recipes
+                .Include(r => r.RecipeIngredients)
+                .ThenInclude(ri => ri.Ingredient)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(query))
             {
-                for (int i = 0; i < ingredientIds.Count; i++)
+                recipeQuery = recipeQuery.Where(r => r.Name.ToLower().Contains(query.ToLower()));
+            }
+
+            if (cookingTime.HasValue)
+            {
+                recipeQuery = recipeQuery.Where(r => r.Time <= cookingTime.Value);
+            }
+
+            if(ingredients != null && ingredients.Any())
+            {
+                foreach(var ingredientName in ingredients)
                 {
-                    var ingredient = _context.Ingredients.FirstOrDefault(ing => ing.Id == ingredientIds[i]);
-                    if (ingredient != null)
-                    {
-                        
-                    }
+                    var lowerName = ingredientName.ToLower();
+                    recipeQuery = recipeQuery.Where(r => r.RecipeIngredients
+                    .Any(ri => ri.Ingredient.Name.ToLower() == lowerName));
                 }
             }
 
-            return View(model); // Always pass a valid model
+            if (string.IsNullOrEmpty(query))
+            {
+                recipeQuery = recipeQuery
+                    .OrderByDescending(r => r.RecipeIngredients
+                    .Count(ri => ingredients.Contains(ri.Ingredient.Name)))
+                    .ThenBy(r => r.Time);
+            }
+            else
+            {
+                recipeQuery = recipeQuery
+                    .OrderBy(r => r.Name)
+                    .ThenBy(r => r.Time);
+            }
+
+            model.Results = recipeQuery.ToList();
+
+            return View(model);
+            
         }
 
 
@@ -106,9 +139,13 @@ namespace RecipesApp.Controllers
         public async Task<IActionResult> SearchIngredients(string term)
         {
             var ingredients = await _context.Ingredients
-                .Where(i => i.Name.Contains(term.ToLower()))
+                .Where(i => i.Name.ToLower().Contains(term.ToLower())) // Case-insensitive
                 .OrderBy(i => i.Name)
-                .Select(i => i.Name)
+                .Select(i => new
+                {
+                    Name = i.Name,
+                    Unit = i.Unit
+                })
                 .Take(10)
                 .ToListAsync();
 

@@ -16,16 +16,16 @@
         <label for="ingredientSearch">Добавьте ингредиенты</label>
         <div style="position: relative;">
             <input type="text" id="ingredientSearch" class="form-control"
-                   placeholder="Поиск ингредиентов" autocomplete="off"
-                   onkeydown="return handleEnter(event)" />
+            placeholder="Поиск ингредиентов" autocomplete="off"
+            onkeydown="return handleEnter(event)" />
             <div id="ingredientDropdown" class="dropdown-menu"
-                 style="display:none; width:100%; position:absolute; z-index:1000;"></div>
+            style="display:none; width:100%; position:absolute; z-index:1000;"></div>
         </div>
         <ul id="IngredientList" class="list-group mt-2"></ul>
     </div>
 
     <div class="mb-3">
-        <label for="cookingTIme" class="form-label">Время приготовления</label>
+        <label for="cookingTIme" class="form-label">Время приготовления (в минутах)</label>
         <input type="number" id="cookingTime" name="cookingTime" class="form-control" value="" />
     </div>
 
@@ -33,6 +33,42 @@
     <button type="button" class="btn btn-secondary ms-2">Filter</button>
     <button type="button" class="btn btn-secondary ms-2">Sort</button>
 </form>
+
+@if (Model.Results.Any())
+{
+    <div class="search-results mt-5">
+        <h3>Найдено рецептов: @Model.Results.Count</h3>
+        <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
+            @foreach(var recipe in Model.Results)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                        {
+                            <img src="@recipe.ImageUrl" class="card-img-top" alt="@recipe.Name"/>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@recipe.Name</h5>
+                            <p class="card-text">
+                                <small class="text-muted">Время приготовления: @recipe.Time минут</small>
+                            </p>
+                            <a asp-controller="Recipes"
+                            asp-action="Details"
+                            asp-route-id="@recipe.Id"
+                            class="btn btn-primary">Посмотреть рецепт</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else if (Context.Request.QueryString.HasValue)
+{
+    <div class="alert alert-info mt-4">
+        Ничего не найдено
+    </div>
+}
 
 @section Scripts {
     <script>
@@ -47,16 +83,16 @@
         function selectIngredient(event) {
             const target = event.target.closest('a'); // Handle nested elements
             if (!target) return;
+            const name = target.dataset.name;
+            const unit = target.dataset.unit;
 
-            const ingredient = target.textContent.trim();
-            addIngredientToList(ingredient);
+            addIngredientToList(name,unit);
             document.getElementById('ingredientSearch').value = '';
             document.getElementById('ingredientDropdown').style.display = 'none';
             event.preventDefault();
         }
 
-        // Modified dropdown generation
-        document.getElementById('ingredientSearch').addEventListener('input', async function(e) {
+                document.getElementById('ingredientSearch').addEventListener('input', async function(e) {
             const searchTerm = e.target.value.trim().toLocaleLowerCase('ru-RU');
             const dropdown = document.getElementById('ingredientDropdown');
 
@@ -65,13 +101,19 @@
                     const response = await fetch(`/Recipes/SearchIngredients?term=${encodeURIComponent(searchTerm)}`);
                     currentValidIngredients = await response.json();
 
+                    console.log('API Response:', currentValidIngredients);
+
                     const existing = getExistingIngredients();
                     const filtered = currentValidIngredients.filter(ing =>
-                        !existing.includes(ing.trim().toLowerCase())
+                        !existing.includes(ing.name.toLowerCase()) // Use ing.Name
                     );
 
                     dropdown.innerHTML = filtered.map(ing =>
-                        `<a href="#" class="dropdown-item d-block" onclick="selectIngredient(event)">${ing}</a>`
+                        `<a href="#" class="dropdown-item" onclick="selectIngredient(event)"
+                           data-name="${ing.name}"
+                           data-unit="${ing.unit}">
+                            ${ing.name} (${ing.unit})
+                        </a>`
                     ).join('');
 
                     dropdown.style.display = filtered.length > 0 ? 'block' : 'none';
@@ -86,17 +128,28 @@
         });
 
         // Updated addIngredientToList with proper duplicate check
-        function addIngredientToList(ingredient) {
+        function addIngredientToList(name,unit) {
             const list = document.getElementById('IngredientList');
             const existing = getExistingIngredients();
 
-            if (!existing.includes(ingredient.trim().toLowerCase())) {
+            if (!existing.includes(name.toLowerCase())) {
                 const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.className = 'list-group-item d-flex align-items-center gap-3';
                 li.innerHTML = `
-                    ${ingredient}
-                    <input type="hidden" name="ingredients" value="${ingredient}" />
-                    <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">&times;</button>
+                    <div class="d-flex gap-2 align-items-center flex-grow-1">
+                    <span class="ingredient-name">${name}</span>
+                    <input type="number"
+                           name="quantities"
+                           value="1"
+                           min="1"
+                           step="1"
+                           class="form-control form-control-sm quantity-input"
+                           style="width: 100px">
+                    <span class="unit-display">${unit}</span>
+                </div>
+                <input type="hidden" name="ingredients" value="${name}">
+                <input type="hidden" name="units" value="${unit}">
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeIngredient(this)">&times;</button>
                 `;
                 list.appendChild(li);
             }
