@@ -29,12 +29,12 @@
                         <div class="d-flex gap-2 align-items-center flex-grow-1">
                             <span class="ingredient-name">@ingredient.Name</span>
                             <input type="number"
-                                   name="quantities"
-                                   value="@ingredient.Quantity"
-                                   min="0.1"
-                                   step="0.1"
-                                   class="form-control form-control-sm quantity-input"
-                                   style="width: 100px">
+                            name="quantities"
+                            value="@ingredient.Quantity"
+                            min="0.1"
+                            step="0.1"
+                            class="form-control form-control-sm quantity-input"
+                            style="width: 100px">
                             <span class="unit-display">@ingredient.Unit</span>
                         </div>
                         <input type="hidden" name="ingredients" value="@ingredient.Name">
@@ -71,27 +71,57 @@
         <div class="search-results mt-5">
             <h3>Найдено рецептов: @Model.Results.Count</h3>
             <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
-                @foreach (var recipe in Model.Results)
+                @foreach (var result in Model.Results)
                 {
                     <div class="col">
                         <div class="card h-100 mb-3 card-hover">
-                            <img src="@(!string.IsNullOrEmpty(recipe.ImageUrl) ? recipe.ImageUrl : "/images/placeholder.jpg")"
-                                 class="card-img-top"
-                                 alt="@recipe.Name"
-                                 style="height: 200px; object-fit: cover;">
+                            <img src="@(result.Recipe.ImageUrl ?? "/images/placeholder.jpg")"
+                            class="card-img-top"
+                            alt="@result.Recipe.Name"
+                            style="height: 200px; object-fit: cover;">
                             <div class="card-body">
+                                <h5 class="card-title">@result.Recipe.Name</h5>
 
-                                <h5 class="card-title">@recipe.Name</h5>
+                                @if (result.MatchedIngredients.Any())
+                                {
+                                    <div class="matched-ingredients mb-2">
+                                        <small class="text-success">
+                                            <strong>Совпадает (@result.MatchedIngredients.Count):</strong>
+                                        </small>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach (var ingredint in result.MatchedIngredients)
+                                            {
+                                                <span class="badge bg-success">@ingredint</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                
+
+                                @if (result.MissingIngredients.Any())
+                                {
+                                    <div class="missing-ingredients">
+                                        <small class="text-danger">
+                                            <strong>Отсутствует (@result.MissingIngredients.Count):</strong>
+                                        </small>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach(var ingredient in result.MissingIngredients)
+                                            {
+                                                <span class="badge bg-danger">@ingredient</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
                                 <p class="card-text">
-                                    <small class="text-muted">Время приготовления: @recipe.Time минут</small><br>
                                     <small class="text-muted">
-                                        Совпадающих ингредиентов: @recipe.RecipeIngredients.Count(ri =>
-                            Model.SelectedIngredients.Any(si => si.Name == ri.Ingredient.Name))
-                                    </small>
+                                        <i class="fas fa-clock"></i> @result.Recipe.Time минут
+                                        </small>
                                 </p>
+
                                 <a asp-controller="Recipes"
                                    asp-action="Details"
-                                   asp-route-id="@recipe.Id"
+                                   asp-route-id="@result.Recipe.Id"
                                    class="btn btn-primary btn-sm">
                                     Посмотреть рецепт
                                 </a>

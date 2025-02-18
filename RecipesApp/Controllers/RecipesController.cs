@@ -130,12 +130,23 @@ namespace RecipesApp.Controllers
 
 
             model.Results = recipeQuery
-            .AsEnumerable() 
-            .OrderByDescending(r => r.RecipeIngredients
-                .Count(ri => ingredients.Contains(ri.Ingredient.Name)))
-            .ThenBy(r => r.Time)
+            .AsEnumerable()
+            .Select(r => new RecipeSearchResult
+            {
+                Recipe = r,
+                MatchedIngredients = r.RecipeIngredients
+                .Where(ri => ingredients.Contains(ri.Ingredient.Name))
+                .Select(ri => ri.Ingredient.Name)
+                .ToList(),
+                MissingIngredients = r.RecipeIngredients
+                .Where(ri => !ingredients.Contains(ri.Ingredient.Name))
+                .Select(ri => ri.Ingredient.Name)
+                .ToList()
+            })
+            .OrderByDescending(r => r.MatchedIngredients.Count)
+            .ThenBy(r => r.MissingIngredients.Count)
+            .ThenBy(r => r.Recipe.Time)
             .ToList();
-            model.Results = recipeQuery.ToList();
 
             return View(model);
             
