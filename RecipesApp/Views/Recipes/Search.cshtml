@@ -11,14 +11,14 @@
         <input type="text" id="query" name="query" class="form-control" value="" placeholder="Введите название рецепта" />
     </div>
 
-    <div class="mb-3">
+    <div class="mb-3" id="ingredientsSection" >
         <label>Добавьте ингредиенты</label>
         <div style="position: relative;">
             <input type="text" id="ingredientSearch" class="form-control"
-            placeholder="Поиск ингредиентов" autocomplete="off"
-            onkeydown="return handleEnter(event)" />
+                placeholder="Поиск ингредиентов" autocomplete="off"
+                onkeydown="return handleEnter(event)" />
             <div id="ingredientDropdown" class="dropdown-menu"
-            style="display:none; width:100%; position:absolute; z-index:1000;"></div>
+                style="display:none; width:100%; position:absolute; z-index:1000;"></div>
         </div>
         <ul id="IngredientList" class="list-group mt-2">
             @if (Model.SelectedIngredients != null)
@@ -59,6 +59,12 @@
             <option value="time_desc">Время приготовления (по убыванию)</option>
         </select>
     </div>
+
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="useFridge" name="useFridge" value="true">
+        <label class="form-check-label" for="useFridge">Использовать продукты из холодильника</label>
+    </div>
+
 
     <button type="submit" class="btn btn-success">Поиск</button>
 
@@ -219,24 +225,28 @@ else if (Context.Request.QueryString.HasValue)
 
 @section Scripts {
     <script>
+        //fridge section
+            document.getElementById('useFridge').addEventListener('change', function(e) {
+            const ingredientsSection = document.getElementById('ingredientsSection');
+            const searchInput = document.getElementById('ingredientSearch');
 
-        function getExistingIngredients() {
-            return Array.from(document.querySelectorAll('#IngredientList input[type="hidden"]'))
-                .map(input => input.value.trim().toLowerCase());
-        }
+            if (e.target.checked) {
+                ingredientsSection.style.opacity = '0.5';
+                ingredientsSection.style.pointerEvents = 'none';
+                searchInput.placeholder = 'Ингредиенты из холодильника будут использованы автоматически';
+            } else {
+                ingredientsSection.style.opacity = '1';
+                ingredientsSection.style.pointerEvents = 'auto';
+                searchInput.placeholder = 'Поиск ингредиентов';
+            }
+        });
 
-
-        function selectIngredient(event) {
-            const target = event.target.closest('a'); 
-            if (!target) return;
-            const name = target.dataset.name;
-            const unit = target.dataset.unit;
-
-            addIngredientToList(name,unit);
-            document.getElementById('ingredientSearch').value = '';
-            document.getElementById('ingredientDropdown').style.display = 'none';
-            event.preventDefault();
-        }
+        document.querySelector('form').addEventListener('submit',function(e){
+            const useFridge = document.getElementById('useFridge').checked;
+            if(useFridge){
+                document.querySelectorAll('#IngredientList li').forEach(li => li.remove());
+            }
+        });
 
         document.addEventListener('DOMContentLoaded',function() {
 
@@ -289,6 +299,23 @@ else if (Context.Request.QueryString.HasValue)
         }
         });
 
+        function getExistingIngredients() {
+            return Array.from(document.querySelectorAll('#IngredientList input[type="hidden"]'))
+                .map(input => input.value.trim().toLowerCase());
+        }
+
+
+        function selectIngredient(event) {
+            const target = event.target.closest('a'); 
+            if (!target) return;
+            const name = target.dataset.name;
+            const unit = target.dataset.unit;
+
+            addIngredientToList(name,unit);
+            document.getElementById('ingredientSearch').value = '';
+            document.getElementById('ingredientDropdown').style.display = 'none';
+            event.preventDefault();
+        }
         
 
         

@@ -1,0 +1,135 @@
+﻿@model List<IngredientViewModel>
+
+@{
+    ViewData["Title"] = "Fridge";
+}
+
+<h1>Мой холодильник</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="mb-4">
+            <label>Добавить ингредиенты в холодильник</label>
+            <div style="position: relative">
+                <input type="text" id="fridgeIngredientSearch" class="form-control"
+                placeholder="Поиск ингредиентов..." autocomplete="off"
+                onkeydown="return handleFridgeEnter(event)"/>
+                <div id="fridgeIngredientDropdown" class="dropdown-menu"
+                style="display:none;width:100%;position:absolute;z-index:1000;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Ваш холодильник
+                @* <a asp-action="Search" asp-route-useFridge="true" class="btn btn-sm btn-success float-end"> *@
+                @*     Поиск по рецептам *@
+                @* </a> *@
+            </div>
+            <ul id="fridgeIngredientList" class="list-group list-group-flush">
+                @foreach (var item in Model)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold">@item.Name</span>
+                            <span class="text-muted ms-2">(@item.Unit)</span>
+                        </div>
+                        <form asp-action="RemoveFromFridge" method="post">
+                            <input type="hidden" name="name" value="@item.Name">
+                            <button type="submit" class="btn btn-sm btn-danger">&times;</button>
+                        </form>
+                    </li>
+                }
+            </ul>
+
+            @if (!Model.Any())
+            {
+                <div class="card-body">
+                    <p class="text-muted mb-0">В вашем холодильнике пока ничего нет.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+
+</div>
+
+@section Scripts {
+    <script>
+        let currentFridgeIngredients = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const fridgeSearch = document.getElementById('fridgeIngredientSearch');
+            const fridgeDropdown = document.getElementById('fridgeIngredientDropdown');
+
+            fridgeSearch.addEventListener('input', async function(e) {
+                const term = e.target.value.trim();
+                if (term.length > 1) {
+                    try {
+                        const response = await fetch(`/Recipes/SearchIngredients?term=${encodeURIComponent(term)}`);
+                        const ingredients = await response.json();
+
+                        const existing = @Html.Raw(Json.Serialize(Model.Select(i => i.Name.ToLower())));
+                        const filtered = ingredients.filter(ing =>
+                            !existing.includes(ing.name.toLowerCase())
+                        );
+
+                        fridgeDropdown.innerHTML = filtered.map(ing => `
+                            <a href="#" class="dropdown-item"
+                               data-name="${ing.name}"
+                               data-unit="${ing.unit}"
+                               onclick="addFridgeIngredient('${ing.name}', '${ing.unit}')">
+                                ${ing.name} (${ing.unit})
+                            </a>
+                        `).join('');
+
+                        fridgeDropdown.style.display = filtered.length ? 'block' : 'none';
+                    } catch (error) {
+                        console.error('Error:', error);
+                        fridgeDropdown.style.display = 'none';
+                    }
+                } else {
+                    fridgeDropdown.style.display = 'none';
+                }
+            });
+        });
+
+        function addFridgeIngredient(name, unit) {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/Recipes/AddToFridge';
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'hidden';
+            nameInput.name = 'name';
+            nameInput.value = name;
+
+            const unitInput = document.createElement('input');
+            unitInput.type = 'hidden';
+            unitInput.name = 'unit';
+            unitInput.value = unit;
+
+            form.appendChild(nameInput);
+            form.appendChild(unitInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function handleFridgeEnter(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const term = e.target.value.trim();
+                const match = currentFridgeIngredients.find(ing =>
+                    ing.name.toLowerCase() === term.toLowerCase()
+                );
+
+                if (match) {
+                    addFridgeIngredient(match.name, match.unit);
+                    e.target.value = '';
+                }
+                return false;
+            }
+            return true;
+        }
+    </script>
+}

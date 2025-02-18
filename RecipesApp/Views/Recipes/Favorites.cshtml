@@ -11,19 +11,7 @@ else
     <div class="row">
         @foreach (var recipe in Model)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    @if (!string.IsNullOrEmpty(recipe.ImageUrl))
-                    {
-                        <img src="@recipe.ImageUrl" class="card-img-top" alt="@recipe.Name">
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@recipe.Name</h5>
-                        <p class="card-text">@recipe.Instructions</p>
-                        <a asp-action="Details" asp-route-id="@recipe.Id" class="btn btn-primary">View Recipe</a>
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync("_RecipeCard", recipe)
         }
     </div>
 }

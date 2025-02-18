@@ -50,12 +50,14 @@ namespace RecipesApp.Controllers
             return View(recipe);
         }
 
-        public IActionResult Search(string query,
+        public IActionResult Search(
+            string query,
             int? cookingTime,
             List<string> ingredients,
             List<double> quantities,
             List<string> units,
-            string sortOrder)
+            string sortOrder,
+            bool useFridge = false)
         {
             var model = new RecipeSearchViewModel
             {
@@ -65,6 +67,22 @@ namespace RecipesApp.Controllers
                 ?? new List<IngredientSelection>(),
                 SortOrder = sortOrder
             };
+
+            //fridge setcion
+            if (useFridge)
+            {
+                var fridge = HttpContext.Session.Get<List<IngredientViewModel>>("Fridge");
+                if(fridge!=null && fridge.Any())
+                {
+                    ingredients = fridge.Select(i => i.Name).ToList();
+                    model.SelectedIngredients = fridge.Select(i => new IngredientSelection
+                    {
+                        Name = i.Name,
+                        Unit = i.Unit,
+                        Quantity = 1
+                    }).ToList();
+                }
+            }
 
             var recipeQuery = _context.Recipes
                 .Include(r => r.RecipeIngredients)
@@ -158,7 +176,40 @@ namespace RecipesApp.Controllers
 
         public IActionResult Fridge()
         {
-            return null;
+            var fridgeIngredients = HttpContext.Session.Get<List<IngredientViewModel>>("Fridge")
+                ?? new List<IngredientViewModel>();
+            return View(fridgeIngredients);
+        }
+
+        [HttpPost]
+        public IActionResult AddToFridge(string name, string unit)
+        {
+            var fridge = HttpContext.Session.Get<List<IngredientViewModel>>("Fridge")
+                ?? new List<IngredientViewModel>();
+
+            if (!fridge.Any(i => i.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+            {
+                fridge.Add(new IngredientViewModel
+                {
+                    Name = name,
+                    Unit = unit
+                });
+                HttpContext.Session.Set("Fridge", fridge);
+            }
+
+            return RedirectToAction("Fridge");
+        }
+
+        [HttpPost]
+        public IActionResult RemoveFromFridge(string name)
+        {
+            var fridge = HttpContext.Session.Get<List<IngredientViewModel>>("Fridge");
+            if(fridge != null)
+            {
+                fridge.RemoveAll(i => i.Name.Equals(name,StringComparison.OrdinalIgnoreCase));
+                HttpContext.Session.Set("Fridge", fridge);
+            }
+            return RedirectToAction("Fridge");
         }
 
 

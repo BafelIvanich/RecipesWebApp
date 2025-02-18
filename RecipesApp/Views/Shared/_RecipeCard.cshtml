@@ -1,0 +1,32 @@
+﻿@model Recipe
+
+<div class="col-md-4 mb-4">
+    <div class="recipe-card">
+        <img src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : "/images/placeholder.jpg")"
+             class="recipe-card-img" alt="@Model.Name">
+        <div class="recipe-card-body">
+            <h5 class="card-title">@Model.Name</h5>
+            <p class="card-text"><strong>Время приготовления:</strong> @Model.Time минут</p>
+
+            <div class="ingredients-list">
+                <h6>Ингредиенты:</h6>
+                <ul>
+                    @foreach (var ri in Model.RecipeIngredients)
+                    {
+                        <li>@ri.Ingredient.Name - @ri.Quantity @ri.Unit</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="card-footer-buttons d-flex justify-content-between align-items-center mt-auto">
+                <a href="@Url.Action("Details", "Recipes", new { id = Model.Id })"
+                   class="btn btn-primary">
+                    Посмотреть рецепт
+                </a>
+                <button class="btn btn-outline-danger favorite-btn" data-recipe-id="@Model.Id">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
