@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RecipesApp.Controllers;
 using RecipesApp.Data;
 using RecipesApp.Models;
 
@@ -6,10 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
+
+builder.Services.AddSession();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -24,6 +29,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -31,6 +38,8 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 Seed(app);
+
+
 
 
 

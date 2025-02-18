@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RecipesApp.Data;
 using RecipesApp.Models;
+using RecipesApp.Extensions;
+using System.Net.WebSockets;
+using System.Runtime.InteropServices;
 
 namespace RecipesApp.Controllers
 {
@@ -17,6 +20,7 @@ namespace RecipesApp.Controllers
         public RecipesController(ApplicationDbContext context)
         {
             _context = context;
+
         }
 
         // GET: Recipes
@@ -152,6 +156,11 @@ namespace RecipesApp.Controllers
             
         }
 
+        public IActionResult Fridge()
+        {
+            return null;
+        }
+
 
 
         [HttpGet]
@@ -199,6 +208,36 @@ namespace RecipesApp.Controllers
                 .ToListAsync();
 
             return Ok(ingredients);
+        }
+
+        [HttpPost]
+        public IActionResult ToggleFavorite(int recipeId)
+        {
+            var favorites = HttpContext.Session.Get<List<int>>("Favorites") ?? new List<int>();
+
+            if (favorites.Contains(recipeId))
+            {
+                favorites.Remove(recipeId);
+            }
+            else
+            {
+                favorites.Add(recipeId);
+            }
+
+            HttpContext.Session.Set("Favorites", favorites);
+            return RedirectToAction("Details", new { id = recipeId });
+        }
+
+        public IActionResult Favorites()
+        {
+            var favorites = HttpContext.Session.Get<List<int>>("Favorites") ?? new List<int>();
+            var recipes = _context.Recipes
+                .Where(r => favorites.Contains(r.Id))
+                .Include(r => r.RecipeIngredients)
+                .ThenInclude(ri => ri.Ingredient)
+                .ToList();
+
+            return View(recipes);
         }
 
 
@@ -267,6 +306,21 @@ namespace RecipesApp.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult TestSession()
+        {
+            //Test
+            var id = 23;
+
+            var favorites = HttpContext.Session.Get<List<int>>("Favorites") ?? new List<int>();
+            if (!favorites.Contains(id))
+            {
+                favorites.Add(id);
+                HttpContext.Session.Set("Favorites", favorites);
+            }
+
+            return RedirectToAction("Favorites");
         }
 
         private bool RecipeExists(int id)
