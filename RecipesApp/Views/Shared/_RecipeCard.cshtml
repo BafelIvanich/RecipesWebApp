@@ -1,4 +1,14 @@
-﻿@model Recipe
+﻿@using Microsoft.AspNetCore.Http
+@using RecipesApp.Extensions
+@inject IHttpContextAccessor HttpContextAccessor
+@model Recipe
+
+@{
+    // Null-check the HttpContext
+    var session = HttpContextAccessor?.HttpContext?.Session;
+    var favorites = session?.Get<List<int>>("Favorites") ?? new List<int>();
+    var isFavorite = favorites.Contains(Model.Id);
+}
 
 <div class="col-md-4 mb-4">
     <div class="recipe-card">
@@ -23,8 +33,9 @@
                    class="btn btn-primary">
                     Посмотреть рецепт
                 </a>
-                <button class="btn btn-outline-danger favorite-btn" data-recipe-id="@Model.Id">
-                    <i class="far fa-heart"></i>
+                <button class="btn btn-outline-secondary favorite-btn @(isFavorite ? "active" : "")"
+                        data-recipe-id="@Model.Id">
+                    <i class="@(isFavorite ? "fas text-danger" : "far") fa-heart"></i>
                 </button>
             </div>
         </div>

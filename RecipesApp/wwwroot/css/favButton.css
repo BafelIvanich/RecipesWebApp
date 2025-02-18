@@ -1,0 +1,30 @@
+﻿.favorite-btn {
+    /* Completely reset button states */
+    background-color: transparent !important;
+    border-color: #dee2e6 !important;
+    transition: none !important;
+}
+
+    /* Handle all interactive states */
+    .favorite-btn:hover,
+    .favorite-btn:active,
+    .favorite-btn:focus,
+    .favorite-btn:focus-visible {
+        background-color: transparent !important;
+        border-color: #dee2e6 !important;
+        box-shadow: none !important;
+    }
+
+    /* Heart icon styling */
+    .favorite-btn.active .fa-heart {
+        color: #dc3545 !important;
+    }
+
+    .favorite-btn .fa-heart {
+        transition: color 0.3s ease;
+    }
+
+    .favorite-btn:hover .fa-heart {
+        color: #dc3545 !important;
+        opacity: 0.7;
+    }

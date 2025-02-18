@@ -15,3 +15,35 @@ else
         }
     </div>
 }
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const recipeId = this.dataset.recipeId;
+                    const cardColumn = this.closest('.col-md-4');
+
+                    try {
+                        const response = await fetch(`/Recipes/ToggleFavorite?recipeId=${recipeId}`, {
+                            method: 'POST'
+                        });
+
+                        if (response.ok) {
+                            cardColumn.remove();
+
+                            const remainingCards = document.querySelectorAll('.col-md-4');
+                            if (remainingCards.length === 0) {
+                                document.getElementById('favorites-container').innerHTML = `
+                                    <p>No favorite recipes yet!</p>
+                                `;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+}
