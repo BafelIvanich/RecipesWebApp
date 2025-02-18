@@ -47,15 +47,19 @@ namespace RecipesApp.Controllers
         }
 
         public IActionResult Search(string query,
-            int? cookingTime,
-            List<string> ingredients)
+    int? cookingTime,
+    List<string> ingredients,
+    List<double> quantities,
+    List<string> units,
+    string sortOrder)
         {
             var model = new RecipeSearchViewModel
             {
                 Name = query,
                 Time = cookingTime ?? 0,
                 SelectedIngredients = ingredients?.Select(i => new IngredientSelection { Name = i}).ToList()
-                ?? new List<IngredientSelection>()
+                ?? new List<IngredientSelection>(),
+                SortOrder = sortOrder
             };
 
             var recipeQuery = _context.Recipes
@@ -75,28 +79,62 @@ namespace RecipesApp.Controllers
 
             if(ingredients != null && ingredients.Any())
             {
-                foreach(var ingredientName in ingredients)
-                {
-                    var lowerName = ingredientName.ToLower();
-                    recipeQuery = recipeQuery.Where(r => r.RecipeIngredients
-                    .Any(ri => ri.Ingredient.Name.ToLower() == lowerName));
-                }
+                model.SelectedIngredients = ingredients
+            .Zip(quantities, (name, qty) => new { name, qty })
+            .Zip(units, (temp, unit) => new IngredientSelection
+            {
+                Name = temp.name,
+                Quantity = temp.qty,
+                Unit = unit
+            })
+            .ToList();
+
+                var ingredientNames = ingredients.Select(i => i.ToLower()).ToList();
+                recipeQuery = recipeQuery.Where(r => r.RecipeIngredients
+                .Any(ri => ingredientNames.Contains(ri.Ingredient.Name.ToLower())));
+
+                //foreach(var ingredientName in ingredients)
+                //{
+                //    var lowerName = ingredientName.ToLower();
+                //    recipeQuery = recipeQuery.Where(r => r.RecipeIngredients
+                //    .Any(ri => ri.Ingredient.Name.ToLower() == lowerName));
+                //}
             }
 
-            if (string.IsNullOrEmpty(query))
+            if (!string.IsNullOrEmpty(sortOrder))
             {
-                recipeQuery = recipeQuery
-                    .OrderByDescending(r => r.RecipeIngredients
-                    .Count(ri => ingredients.Contains(ri.Ingredient.Name)))
-                    .ThenBy(r => r.Time);
+                recipeQuery = sortOrder switch
+                {
+                    "time_asc" => recipeQuery.OrderBy(r => r.Time),
+                    "time_desc" => recipeQuery.OrderByDescending(r => r.Time),
+                    _ => recipeQuery
+                };
             }
             else
             {
-                recipeQuery = recipeQuery
-                    .OrderBy(r => r.Name)
-                    .ThenBy(r => r.Time);
+                if (string.IsNullOrEmpty(query))
+                {
+                    recipeQuery = recipeQuery
+                        .OrderByDescending(r => r.RecipeIngredients
+                        .Count(ri => ingredients.Contains(ri.Ingredient.Name)))
+                        .ThenBy(r => r.Time);
+                }
+                else
+                {
+                    recipeQuery = recipeQuery
+                        .OrderBy(r => r.Name)
+                        .ThenBy(r => r.Time);
+                }
             }
 
+
+
+            model.Results = recipeQuery
+            .AsEnumerable() 
+            .OrderByDescending(r => r.RecipeIngredients
+                .Count(ri => ingredients.Contains(ri.Ingredient.Name)))
+            .ThenBy(r => r.Time)
+            .ToList();
             model.Results = recipeQuery.ToList();
 
             return View(model);
@@ -139,7 +177,7 @@ namespace RecipesApp.Controllers
         public async Task<IActionResult> SearchIngredients(string term)
         {
             var ingredients = await _context.Ingredients
-                .Where(i => i.Name.ToLower().Contains(term.ToLower())) // Case-insensitive
+                .Where(i => i.Name.ToLower().Contains(term.ToLower())) 
                 .OrderBy(i => i.Name)
                 .Select(i => new
                 {

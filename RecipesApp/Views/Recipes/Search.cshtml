@@ -11,9 +11,8 @@
         <input type="text" id="query" name="query" class="form-control" value="" placeholder="Введите название рецепта" />
     </div>
 
-    <!-- Remove the "Add Ingredient" button from your view -->
     <div class="mb-3">
-        <label for="ingredientSearch">Добавьте ингредиенты</label>
+        <label>Добавьте ингредиенты</label>
         <div style="position: relative;">
             <input type="text" id="ingredientSearch" class="form-control"
             placeholder="Поиск ингредиентов" autocomplete="off"
@@ -21,7 +20,30 @@
             <div id="ingredientDropdown" class="dropdown-menu"
             style="display:none; width:100%; position:absolute; z-index:1000;"></div>
         </div>
-        <ul id="IngredientList" class="list-group mt-2"></ul>
+        <ul id="IngredientList" class="list-group mt-2">
+            @if (Model.SelectedIngredients != null)
+            {
+                foreach (var ingredient in Model.SelectedIngredients)
+                {
+                    <li class="list-group-item d-flex align-items-center gap-3">
+                        <div class="d-flex gap-2 align-items-center flex-grow-1">
+                            <span class="ingredient-name">@ingredient.Name</span>
+                            <input type="number"
+                                   name="quantities"
+                                   value="@ingredient.Quantity"
+                                   min="0.1"
+                                   step="0.1"
+                                   class="form-control form-control-sm quantity-input"
+                                   style="width: 100px">
+                            <span class="unit-display">@ingredient.Unit</span>
+                        </div>
+                        <input type="hidden" name="ingredients" value="@ingredient.Name">
+                        <input type="hidden" name="units" value="@ingredient.Unit">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeIngredient(this)">&times;</button>
+                    </li>
+                }
+            }
+        </ul>
     </div>
 
     <div class="mb-3">
@@ -29,40 +51,64 @@
         <input type="number" id="cookingTime" name="cookingTime" class="form-control" value="" />
     </div>
 
+    <div class="mb-3">
+        <label for="sortOrder" class="form-label">Сортировка:</label>
+        <select name="sortOrder" class="form-select" style="width:auto;display:inline-block;">
+            <option value="">По умолчанию</option>
+            <option value="time_asc">Время приготовления (по возрастанию)</option>
+            <option value="time_desc">Время приготовления (по убыванию)</option>
+        </select>
+    </div>
+
     <button type="submit" class="btn btn-success">Поиск</button>
-    <button type="button" class="btn btn-secondary ms-2">Filter</button>
-    <button type="button" class="btn btn-secondary ms-2">Sort</button>
+
 </form>
 
-@if (Model.Results.Any())
+@if (Context.Request.QueryString.HasValue)
 {
-    <div class="search-results mt-5">
-        <h3>Найдено рецептов: @Model.Results.Count</h3>
-        <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
-            @foreach(var recipe in Model.Results)
-            {
-                <div class="col">
-                    <div class="card h-100">
-                        @if (!string.IsNullOrEmpty(recipe.ImageUrl))
-                        {
-                            <img src="@recipe.ImageUrl" class="card-img-top" alt="@recipe.Name"/>
-                        }
-                        <div class="card-body">
-                            <h5 class="card-title">@recipe.Name</h5>
-                            <p class="card-text">
-                                <small class="text-muted">Время приготовления: @recipe.Time минут</small>
-                            </p>
-                            <a asp-controller="Recipes"
-                            asp-action="Details"
-                            asp-route-id="@recipe.Id"
-                            class="btn btn-primary">Посмотреть рецепт</a>
+    @if (Model.Results.Any())
+    {
+        <div class="search-results mt-5">
+            <h3>Найдено рецептов: @Model.Results.Count</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+                @foreach (var recipe in Model.Results)
+                {
+                    <div class="col">
+                        <div class="card h-100 mb-3 card-hover">
+                            <img src="@(!string.IsNullOrEmpty(recipe.ImageUrl) ? recipe.ImageUrl : "/images/placeholder.jpg")"
+                                 class="card-img-top"
+                                 alt="@recipe.Name"
+                                 style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">@recipe.Name</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">Время приготовления: @recipe.Time минут</small><br>
+                                    <small class="text-muted">
+                                        Совпадающих ингредиентов: @recipe.RecipeIngredients.Count(ri =>
+                            Model.SelectedIngredients.Any(si => si.Name == ri.Ingredient.Name))
+                                    </small>
+                                </p>
+                                <a asp-controller="Recipes"
+                                   asp-action="Details"
+                                   asp-route-id="@recipe.Id"
+                                   class="btn btn-primary btn-sm">
+                                    Посмотреть рецепт
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="alert alert-info mt-4">
+            По вашему запросу ничего не найдено
+        </div>
+    }
 }
+
 else if (Context.Request.QueryString.HasValue)
 {
     <div class="alert alert-info mt-4">
@@ -70,18 +116,66 @@ else if (Context.Request.QueryString.HasValue)
     </div>
 }
 
+<style>
+    .card-hover {
+        position: relative;
+        background: transparent;
+        border: none !important; /* Remove default border */
+        overflow: visible; /* Ensure pseudo-element is visible */
+    }
+
+        /* Wobbly border pseudo-element */
+        .card-hover::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px solid #000;
+            border-radius: var(--bs-border-radius); /* Match Bootstrap's radius */
+            z-index: -1;
+            animation: wobble-border 0.8s linear infinite paused;
+            transition: all 0.3s ease;
+        }
+
+        /* Hover to start animation */
+        .card-hover:hover::before {
+            animation-play-state: running;
+            transform: scale(1.02); /* Optional slight scale effect */
+        }
+
+    /* Wobble animation definition */
+    @@keyframes wobble-border {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        25% {
+            transform: translate(2px, -1px) rotate(1deg);
+        }
+
+        50% {
+            transform: translate(-1px, 2px) rotate(-1deg);
+        }
+
+        75% {
+            transform: translate(-2px, -1px) rotate(0.5deg);
+        }
+    }
+</style>
+
 @section Scripts {
     <script>
 
-        // Helper function to get existing ingredients PROPERLY
         function getExistingIngredients() {
             return Array.from(document.querySelectorAll('#IngredientList input[type="hidden"]'))
                 .map(input => input.value.trim().toLowerCase());
         }
 
-        // Updated selectIngredient handler
+
         function selectIngredient(event) {
-            const target = event.target.closest('a'); // Handle nested elements
+            const target = event.target.closest('a'); 
             if (!target) return;
             const name = target.dataset.name;
             const unit = target.dataset.unit;
@@ -92,7 +186,12 @@ else if (Context.Request.QueryString.HasValue)
             event.preventDefault();
         }
 
-                document.getElementById('ingredientSearch').addEventListener('input', async function(e) {
+        document.addEventListener('DOMContentLoaded',function() {
+
+            let currentValidIngredients = [];
+            initializeExistingIngredients();
+
+            document.getElementById('ingredientSearch').addEventListener('input', async function(e) {
             const searchTerm = e.target.value.trim().toLocaleLowerCase('ru-RU');
             const dropdown = document.getElementById('ingredientDropdown');
 
@@ -105,7 +204,7 @@ else if (Context.Request.QueryString.HasValue)
 
                     const existing = getExistingIngredients();
                     const filtered = currentValidIngredients.filter(ing =>
-                        !existing.includes(ing.name.toLowerCase()) // Use ing.Name
+                        !existing.includes(ing.name.toLowerCase()) // ing.Name
                     );
 
                     dropdown.innerHTML = filtered.map(ing =>
@@ -125,10 +224,23 @@ else if (Context.Request.QueryString.HasValue)
                 dropdown.style.display = 'none';
                 currentValidIngredients = [];
             }
+        
         });
 
-        // Updated addIngredientToList with proper duplicate check
-        function addIngredientToList(name,unit) {
+        function initializeExistingIngredients(){
+            const existingIngredients = document.querySelectorAll('#IngredientList li');
+            existingIngredients.forEach(li => {
+                li.querySelector('button').addEventListener('click',function(){
+                    this.parentElement.remove();
+                });
+            });
+        }
+        });
+
+        
+
+        
+        function addIngredientToList(name,unit,quantity = 1) {
             const list = document.getElementById('IngredientList');
             const existing = getExistingIngredients();
 
@@ -140,7 +252,7 @@ else if (Context.Request.QueryString.HasValue)
                     <span class="ingredient-name">${name}</span>
                     <input type="number"
                            name="quantities"
-                           value="1"
+                           value="${quantity}"
                            min="1"
                            step="1"
                            class="form-control form-control-sm quantity-input"
@@ -162,7 +274,7 @@ else if (Context.Request.QueryString.HasValue)
                 const value = input.value.trim();
 
                 const exists = currentValidIngredients.some(ing =>
-                    ing.toLowerCase() === value.toLowerCase()
+                    ing.name.toLowerCase() === value.toLowerCase()
                 );
 
                 if (!exists) {
@@ -184,5 +296,7 @@ else if (Context.Request.QueryString.HasValue)
             }
             return true;
         }
+
+        
     </script>
 }
