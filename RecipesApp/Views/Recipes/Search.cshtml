@@ -80,6 +80,7 @@
                                  alt="@recipe.Name"
                                  style="height: 200px; object-fit: cover;">
                             <div class="card-body">
+
                                 <h5 class="card-title">@recipe.Name</h5>
                                 <p class="card-text">
                                     <small class="text-muted">Время приготовления: @recipe.Time минут</small><br>
@@ -119,49 +120,70 @@ else if (Context.Request.QueryString.HasValue)
 <style>
     .card-hover {
         position: relative;
-        background: transparent;
-        border: none !important; /* Remove default border */
-        overflow: visible; /* Ensure pseudo-element is visible */
+        overflow: visible; 
+        border: none;
+        margin: 8px; 
     }
 
-        /* Wobbly border pseudo-element */
         .card-hover::before {
             content: '';
             position: absolute;
-            top: -2px;
+            top: -2px; 
             left: -2px;
             right: -2px;
             bottom: -2px;
-            border: 2px solid #000;
-            border-radius: var(--bs-border-radius); /* Match Bootstrap's radius */
-            z-index: -1;
-            animation: wobble-border 0.8s linear infinite paused;
-            transition: all 0.3s ease;
+            border: 4px solid #000;
+            z-index: 1;
+            pointer-events: none;
+            animation: none;
+            border-radius: 8px;
+            background: transparent;
         }
 
-        /* Hover to start animation */
         .card-hover:hover::before {
-            animation-play-state: running;
-            transform: scale(1.02); /* Optional slight scale effect */
+            animation: warp 1.5s infinite linear;
         }
 
-    /* Wobble animation definition */
-    @@keyframes wobble-border {
-        0%, 100% {
-            transform: translate(0, 0) rotate(0deg);
-        }
+    
+    .card-img-top {
+        margin: 4px;
+        width: calc(100% - 8px);
+    }
 
-        25% {
-            transform: translate(2px, -1px) rotate(1deg);
-        }
+    .card-body {
+        padding: 1rem;
+        margin: 2px;
+    }
 
-        50% {
-            transform: translate(-1px, 2px) rotate(-1deg);
-        }
+    @@keyframes warp {
+        
+        0%
 
-        75% {
-            transform: translate(-2px, -1px) rotate(0.5deg);
-        }
+    {
+        transform: scale(1);
+        border-radius: 8px;
+    }
+
+    25% {
+        transform: scale(1.02, 1.01);
+        border-radius: 10px;
+    }
+
+    50% {
+        transform: scale(1.01, 1.02);
+        border-radius: 12px;
+    }
+
+    75% {
+        transform: scale(1.02, 1.01);
+        border-radius: 10px;
+    }
+
+    100% {
+        transform: scale(1);
+        border-radius: 8px;
+    }
+
     }
 </style>
 

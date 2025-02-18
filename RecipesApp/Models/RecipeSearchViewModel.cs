@@ -3,7 +3,7 @@
     public class RecipeSearchViewModel
     {
         public string Name { get; set; }
-        public int Time { get;set; }
+        public int Time { get; set; }
         public string? ImageUrl { get; set; }
         public List<IngredientSelection> SelectedIngredients { get; set; } = new List<IngredientSelection>();
         public List<Recipe> Results { get; set; } = new List<Recipe>();

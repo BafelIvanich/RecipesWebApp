@@ -47,11 +47,11 @@ namespace RecipesApp.Controllers
         }
 
         public IActionResult Search(string query,
-    int? cookingTime,
-    List<string> ingredients,
-    List<double> quantities,
-    List<string> units,
-    string sortOrder)
+            int? cookingTime,
+            List<string> ingredients,
+            List<double> quantities,
+            List<string> units,
+            string sortOrder)
         {
             var model = new RecipeSearchViewModel
             {
