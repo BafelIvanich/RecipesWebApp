@@ -4,7 +4,7 @@
 @model Recipe
 
 @{
-    // Null-check the HttpContext
+
     var session = HttpContextAccessor?.HttpContext?.Session;
     var favorites = session?.Get<List<int>>("Favorites") ?? new List<int>();
     var isFavorite = favorites.Contains(Model.Id);
@@ -12,7 +12,7 @@
 
 <div class="col-md-4 mb-4">
     <div class="recipe-card">
-        <img src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : "/images/placeholder.jpg")"
+        <img src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : "/images/placeholder.png")"
              class="recipe-card-img" alt="@Model.Name">
         <div class="recipe-card-body">
             <h5 class="card-title">@Model.Name</h5>
@@ -30,7 +30,7 @@
 
             <div class="card-footer-buttons d-flex justify-content-between align-items-center mt-auto">
                 <a href="@Url.Action("Details", "Recipes", new { id = Model.Id })"
-                   class="btn btn-primary">
+                   class="btn btn-recipe">
                     Посмотреть рецепт
                 </a>
                 <button class="btn btn-outline-secondary favorite-btn @(isFavorite ? "active" : "")"

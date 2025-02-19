@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<Recipe>
 
-<h1>Favorite Recipes</h1>
+<h1>Любимые рецепты</h1>
 
 @if (!Model.Any())
 {
-    <p>No favorite recipes yet!</p>
+    <p>Вы еще не добавили рецепты в избранные!</p>
 }
 else
 {
@@ -35,7 +35,7 @@ else
                             const remainingCards = document.querySelectorAll('.col-md-4');
                             if (remainingCards.length === 0) {
                                 document.getElementById('favorites-container').innerHTML = `
-                                    <p>No favorite recipes yet!</p>
+                                    <p>Вы еще не добавили рецепты в избранные!</p>
                                 `;
                             }
                         }

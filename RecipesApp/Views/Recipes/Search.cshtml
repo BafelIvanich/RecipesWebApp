@@ -128,7 +128,7 @@
                                 <a asp-controller="Recipes"
                                    asp-action="Details"
                                    asp-route-id="@result.Recipe.Id"
-                                   class="btn btn-primary btn-sm">
+                                   class="btn btn-recipe">
                                     Посмотреть рецепт
                                 </a>
                             </div>
@@ -184,7 +184,9 @@ else if (Context.Request.QueryString.HasValue)
     .card-img-top {
         margin: 4px;
         width: calc(100% - 8px);
+
     }
+
 
     .card-body {
         padding: 1rem;

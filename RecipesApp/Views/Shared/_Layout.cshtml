@@ -16,7 +16,10 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/images/logot.png" alt="RecipesApp" height="40" />
+                    <img id="logoImg"
+                         src="/images/logo_static.png"
+                         alt="RecipesApp"
+                         height="40">
                 </a>
 
 
@@ -58,3 +61,94 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
+<style>
+    .navbar {
+        border-bottom: 2px solid black !important;
+        box-shadow: none !important;
+    }
+
+
+    .navbar-nav .nav-item {
+        margin: 0 1.2rem;
+    }
+
+
+    .nav-link {
+        position: relative;
+        transition: all 0.3s ease;
+        transform-origin: center;
+    }
+
+        .nav-link:hover {
+            transform: scale(1.1);
+            animation: wiggle 0.4s ease;
+        }
+
+    @@keyframes wiggle {
+        0% {
+            transform: rotate(0deg) scale(1.1);
+        }
+
+        25% {
+            transform: rotate(3deg) scale(1.1);
+        }
+
+        50% {
+            transform: rotate(-3deg) scale(1.1);
+        }
+
+        75% {
+            transform: rotate(1deg) scale(1.1);
+        }
+
+        100% {
+            transform: rotate(0deg) scale(1.1);
+        }
+    }
+
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: black;
+        transition: width 0.3s ease;
+    }
+
+    .navbar-brand:hover #logoImg {
+        transform: scale(1.2); 
+        cursor: pointer; 
+    }
+
+    .nav-link:hover::after {
+        width: 100%;
+    }
+
+    .navbar-brand:hover .logo-hover-trigger {
+        opacity: 0.9;
+        transition: opacity 0.2s ease;
+    }
+
+    .logo-hover-trigger {
+        pointer-events: auto;
+    }
+
+
+</style>
+
+<script>
+       $(function() {
+        $("#logoImg").hover(
+            function() { 
+                $(this).attr("src", "/images/logo_animated.gif");
+            },
+            function() {
+                $(this).attr("src", "/images/logo_static.png");
+            }
+        );
+    });
+</script>

@@ -359,6 +359,34 @@ namespace RecipesApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public IActionResult CookRecipe(int id)
+        {
+            var recipe = _context.Recipes
+                .Include(r => r.RecipeIngredients)
+                .ThenInclude(ri => ri.Ingredient)
+                .FirstOrDefault(r => r.Id == id);
+
+            if(recipe == null)
+            {
+                return NotFound();
+            }
+
+            var fridge = HttpContext.Session.Get<List<IngredientViewModel>>("Fridge") ?? new List<IngredientViewModel>();
+
+            foreach (var recipeIngredient in recipe.RecipeIngredients)
+            {
+                var fridgeIngredient = fridge.FirstOrDefault(f => f.Name == recipeIngredient.Ingredient.Name);
+
+                if (fridgeIngredient!= null)
+                {
+                    fridge.Remove(fridgeIngredient);
+                }
+            }
+            HttpContext.Session.Set("Fridge", fridge);
+            return RedirectToAction("Details", new { id = id });
+        }
+
         public IActionResult TestSession()
         {
             //Test
