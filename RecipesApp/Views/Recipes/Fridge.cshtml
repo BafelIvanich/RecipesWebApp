@@ -22,9 +22,9 @@
         <div class="card">
             <div class="card-header">
                 Ваш холодильник
-                @* <a asp-action="Search" asp-route-useFridge="true" class="btn btn-sm btn-success float-end"> *@
-                @*     Поиск по рецептам *@
-                @* </a> *@
+                <a asp-action="Search" asp-route-useFridge="true" class="btn btn-sm btn-recipe float-end">
+                     Что приготовить?
+                </a>
             </div>
             <ul id="fridgeIngredientList" class="list-group list-group-flush">
                 @foreach (var item in Model)

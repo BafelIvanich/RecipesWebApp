@@ -39,6 +39,7 @@ namespace RecipesApp.Controllers
             }
 
             var recipe = await _context.Recipes
+                .Include(r => r.Steps)
                 .Include(r => r.RecipeIngredients)
                 .ThenInclude(ri => ri.Ingredient)
                 .FirstOrDefaultAsync(m => m.Id == id);
