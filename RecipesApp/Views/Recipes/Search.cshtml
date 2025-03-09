@@ -81,7 +81,7 @@
                 {
                     <div class="col">
                         <div class="card h-100 mb-3 card-hover">
-                            <img src="@(result.Recipe.ImageUrl ?? "/images/placeholder.jpg")"
+                            <img src="@(result.Recipe.ImageUrl ?? "/images/placeholder.png")"
                             class="card-img-top"
                             alt="@result.Recipe.Name"
                             style="height: 200px; object-fit: cover;">
@@ -203,18 +203,18 @@ else if (Context.Request.QueryString.HasValue)
     }
 
     25% {
-        transform: scale(1.02, 1.01);
-        border-radius: 10px;
+        transform: scale(1.01, 1.005);
+        border-radius: 9px;
     }
 
     50% {
-        transform: scale(1.01, 1.02);
-        border-radius: 12px;
+        transform: scale(1.005, 1.01);
+        border-radius: 10px;
     }
 
     75% {
-        transform: scale(1.02, 1.01);
-        border-radius: 10px;
+        transform: scale(1.01, 1.005);
+        border-radius: 9px;
     }
 
     100% {
