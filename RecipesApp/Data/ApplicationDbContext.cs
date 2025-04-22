@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RecipesApp.Models;
 
 namespace RecipesApp.Data
@@ -30,8 +31,7 @@ namespace RecipesApp.Data
                 .HasOne(ri => ri.Ingredient)
                 .WithMany(i => i.RecipeIngredients)
                 .HasForeignKey(ri => ri.IngredientId);
-
-
         }
+
     }
 }

@@ -1,0 +1,30 @@
+﻿@model RecipesApp.Models.Ingredient
+
+@{
+	ViewData["Title"] = "Add ingredient";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<hr />
+<div class="row">
+	<div class="col-md-6">
+		<form asp-action="Create">
+
+			<div class="form-group mb-3">
+				<label asp-for="Name" class="control-label"></label>
+				<input asp-for="Name" class="form-control"></input>
+			</div>
+
+			<div class="form-group mb-3">
+				<label asp-for="Unit" class="control-label"></label>
+				<input asp-for="Unit" class="form-control"></input>
+			</div>
+
+			<div class="form-group mt-4">
+				<input type="submit" value="Create" class="btn btn-primary" />
+				<a asp-action="ViewIngredients" class="btn btn-secondary">Все ингредиенты</a>
+			</div>
+		</form>
+	</div>
+</div>

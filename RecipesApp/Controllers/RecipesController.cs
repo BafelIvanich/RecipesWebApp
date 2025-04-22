@@ -222,10 +222,16 @@ namespace RecipesApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(RecipeSearchViewModel model)
+        public async Task<IActionResult> Create(Recipe recipe)
         {
             
-            return View(model);
+            if (ModelState.IsValid)
+            {
+                _context.Add(recipe);
+                await _context.SaveChangesAsync();
+            }
+
+            return View(recipe);
         }
 
 
@@ -408,11 +414,7 @@ namespace RecipesApp.Controllers
             return _context.Recipes.Any(e => e.Id == id);
         }
 
-        public IActionResult ViewIngredients()
-        {
-            var ingredients = _context.Ingredients.ToList();
-            return View(ingredients);
-        }
+        
 
     }
 }

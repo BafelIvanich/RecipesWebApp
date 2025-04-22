@@ -11,15 +11,15 @@ using RecipesApp.Data;
 namespace RecipesApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250309191406_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250422200555_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "8.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
