@@ -40,12 +40,15 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Recipes" asp-action="Fridge">Холодильник</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Ingredients" asp-action="ViewIngredients">Ингредиенты</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Recipes" asp-action="Create">Добавить</a>
-                        </li>
+                        <environment include="Development">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Ingredients" asp-action="ViewIngredients">Ингредиенты</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Recipes" asp-action="Create">Добавить</a>
+                            </li>
+                        </environment>
+                        
                     </ul>
                 </div>
 
