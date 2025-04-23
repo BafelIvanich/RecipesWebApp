@@ -1,4 +1,4 @@
-﻿namespace RecipesApp.Models
+﻿namespace RecipesApp.ViewModels
 {
     public class IngredientViewModel
     {

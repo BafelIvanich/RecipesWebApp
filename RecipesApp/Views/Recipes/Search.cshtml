@@ -1,4 +1,5 @@
-﻿@model RecipeSearchViewModel
+﻿@using RecipesApp.ViewModels
+@model RecipeSearchViewModel
 @{
     ViewData["Title"] = "Search";
 }
@@ -48,7 +49,7 @@
 
     <div class="mb-3">
         <label for="cookingTIme" class="form-label">Время приготовления (в минутах)</label>
-        <input type="number" id="cookingTime" name="cookingTime" class="form-control" value="" />
+        <input type="number" id="cookingTime" name="cookingTime" class="form-control" value="" placeholder="Введите время" />
     </div>
 
     <div class="mb-3">
@@ -106,7 +107,7 @@
 
                                 @if (result.MissingIngredients.Any())
                                 {
-                                    <div class="missing-ingredients">
+                                    <div class="missing-ingredients mb-2">
                                         <small class="text-danger">
                                             <strong>Отсутствует (@result.MissingIngredients.Count):</strong>
                                         </small>

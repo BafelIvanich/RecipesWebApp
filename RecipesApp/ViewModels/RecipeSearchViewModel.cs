@@ -1,4 +1,6 @@
-﻿namespace RecipesApp.Models
+﻿using RecipesApp.Models;
+
+namespace RecipesApp.ViewModels
 {
     public class RecipeSearchViewModel
     {

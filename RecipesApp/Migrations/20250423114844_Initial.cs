@@ -41,6 +41,19 @@ namespace RecipesApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RecipeIngredients",
                 columns: table => new
                 {
@@ -90,6 +103,30 @@ namespace RecipesApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RecipeTag",
+                columns: table => new
+                {
+                    RecipesId = table.Column<int>(type: "integer", nullable: false),
+                    TagsId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecipeTag", x => new { x.RecipesId, x.TagsId });
+                    table.ForeignKey(
+                        name: "FK_RecipeTag_Recipes_RecipesId",
+                        column: x => x.RecipesId,
+                        principalTable: "Recipes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RecipeTag_Tags_TagsId",
+                        column: x => x.TagsId,
+                        principalTable: "Tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_RecipeIngredients_IngredientId",
                 table: "RecipeIngredients",
@@ -99,6 +136,11 @@ namespace RecipesApp.Migrations
                 name: "IX_RecipeIngredients_RecipeId",
                 table: "RecipeIngredients",
                 column: "RecipeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecipeTag_TagsId",
+                table: "RecipeTag",
+                column: "TagsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Steps_RecipeId",
@@ -113,10 +155,16 @@ namespace RecipesApp.Migrations
                 name: "RecipeIngredients");
 
             migrationBuilder.DropTable(
+                name: "RecipeTag");
+
+            migrationBuilder.DropTable(
                 name: "Steps");
 
             migrationBuilder.DropTable(
                 name: "Ingredients");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Recipes");

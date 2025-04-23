@@ -13,5 +13,6 @@ namespace RecipesApp.Models
 
         public List<RecipeIngredient> RecipeIngredients { get; set; } = new();
         public List<Step> Steps { get; set; } = new();
+        public List<Tag> Tags { get; set; } = new();
     }
 }

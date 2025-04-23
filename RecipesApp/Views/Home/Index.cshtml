@@ -1,41 +1,89 @@
-﻿
+﻿@model RecipesApp.ViewModels.HomeViewModel
+
 <h2>Все рецепты</h2>
 
-<div class="container">
-    <div class="row">
-        @foreach (var recipe in Model)
+<div class="container mb-4 tags-container">
+    <button class="tag-btn active" data-tag-name="">Все</button> 
+
+    @if (Model.Tags != null)
+    {
+        foreach(var tag in Model.Tags)
         {
-            @await Html.PartialAsync("_RecipeCard", (Recipe)recipe)
+            <button class="tag-btn" data-tag-name="@tag.Name">@tag.Name</button>
         }
-    </div>
+    }
 </div>
 
-<style>
+<div class="container" id="recipe-list-container">
+    @await Html.PartialAsync("_RecipeList", Model.Recipes)
+</div>
 
-</style>
 
 <script>
-    document.querySelectorAll('.favorite-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const recipeId = this.dataset.recipeId;
-                this.classList.toggle('active');
-                this.querySelector('.fa-heart').classList.toggle('fas');
-                this.querySelector('.fa-heart').classList.toggle('far');
+    document.getElementById('recipe-list-container').addEventListener('click',async function(event){
+        const favoriteBtn = event.target.closest('.favorite-btn');
+        if(!favoriteBtn){
+            return;
+        }
 
-                try {
-                    const response = await fetch(`/Recipes/ToggleFavorite?recipeId=${recipeId}`, {
-                        method: 'POST'
-                    });
+        const recipeId = favoriteBtn.dataset.recipeId;
+        const heartIcon = favoriteBtn.querySelector('.fa-heart');
 
-                    if (!response.ok) {
-                        throw new Error('Failed to update favorites');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    this.classList.toggle('active');
-                    this.querySelector('.fa-heart').classList.toggle('fas');
-                    this.querySelector('.fa-heart').classList.toggle('far');
-                }
+        favoriteBtn.classList.toggle('active');
+        heartIcon.classList.toggle('fas');
+        heartIcon.classList.toggle('far');
+
+        try {
+            const response = await fetch(`/Recipes/ToggleFavorite?recipeId=${recipeId}`,{
+                method: 'POST'
             });
+
+            if (!response.ok){
+                console.error('failed to update favorites');
+                favoriteBtn.classList.toggle('active');
+                heartIcon.classList.toggle('fas');
+                heartIcon.classList.toggle('far');
+            }
+        } catch(error)
+        {
+            console.error('error toggling favorites.',error);
+            favoriteBtn.classList.toggle('active');
+            heartIcon.classList.toggle('fas');
+            heartIcon.classList.toggle('far');
+        }
+    })
+
+
+    const recipeListContainer = document.getElementById('recipe-list-container');
+    const tagButtons = document.querySelectorAll('.tags-container .tag-btn');
+
+    tagButtons.forEach(btn => {
+        btn.addEventListener('click', async function() {
+
+            const selectedTagName = this.dataset.tagName;
+
+            tagButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            //загрузка
+
+            try {
+                const fetchUrl = `/Home/RecipeList?selectedTag=${encodeURIComponent(selectedTagName)}`
+                console.log('Fetching',fetchUrl)
+
+                const response = await fetch(fetchUrl);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+
+                const htmlResult = await response.text();
+                recipeListContainer.innerHTML = htmlResult;
+
+            } catch (error) {
+                console.error("Error fetching recipes:", error);
+                recipeListContainer.innerHTML = '<div class="alert alert-danger">Не удалось загрузить рецепты. Попробуйте позже.</div>';
+            }
         });
+    });
 </script>

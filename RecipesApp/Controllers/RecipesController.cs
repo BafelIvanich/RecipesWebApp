@@ -10,6 +10,7 @@ using RecipesApp.Models;
 using RecipesApp.Extensions;
 using System.Net.WebSockets;
 using System.Runtime.InteropServices;
+using RecipesApp.ViewModels;
 
 namespace RecipesApp.Controllers
 {
@@ -40,6 +41,7 @@ namespace RecipesApp.Controllers
 
             var recipe = await _context.Recipes
                 .Include(r => r.Steps)
+                .Include(r => r.Tags)
                 .Include(r => r.RecipeIngredients)
                 .ThenInclude(ri => ri.Ingredient)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -230,7 +232,7 @@ namespace RecipesApp.Controllers
                 _context.Add(recipe);
                 await _context.SaveChangesAsync();
             }
-
+             
             return View(recipe);
         }
 

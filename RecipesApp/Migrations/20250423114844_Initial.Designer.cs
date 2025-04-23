@@ -11,7 +11,7 @@ using RecipesApp.Data;
 namespace RecipesApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250422200555_Initial")]
+    [Migration("20250423114844_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -23,6 +23,21 @@ namespace RecipesApp.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("RecipeTag", b =>
+                {
+                    b.Property<int>("RecipesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TagsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RecipesId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("RecipeTag");
+                });
 
             modelBuilder.Entity("RecipesApp.Models.Ingredient", b =>
                 {
@@ -124,6 +139,39 @@ namespace RecipesApp.Migrations
                     b.HasIndex("RecipeId");
 
                     b.ToTable("Steps");
+                });
+
+            modelBuilder.Entity("RecipesApp.Models.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("RecipeTag", b =>
+                {
+                    b.HasOne("RecipesApp.Models.Recipe", null)
+                        .WithMany()
+                        .HasForeignKey("RecipesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RecipesApp.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RecipesApp.Models.RecipeIngredient", b =>

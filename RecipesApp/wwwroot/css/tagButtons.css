@@ -1,0 +1,22 @@
+﻿.tag-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 2px;
+}
+
+    .tag-btn.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+}

@@ -1,0 +1,17 @@
+﻿@model List<Recipe>
+
+<div class="row">
+	@if(Model!=null && Model.Any())
+	{
+		@foreach(var recipe in Model)
+		{
+			@await Html.PartialAsync("_RecipeCard",recipe)
+		}
+	}
+	else
+	{
+		<div class="col">
+			<p>Рецепты не найдены.</p>
+		</div>
+	}
+</div>

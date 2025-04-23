@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecipesApp.Data;
+using RecipesApp.Models;
 
 namespace RecipesApp.Controllers
 {
     public class IngredientsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+                private readonly ApplicationDbContext _context;
 
 
         public IngredientsController(ApplicationDbContext context)
@@ -35,18 +36,18 @@ namespace RecipesApp.Controllers
 
         // POST: IngredientsController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> Create(Ingredient ingredient)
         {
-            try
+
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                _context.Add(ingredient);
+                await _context.SaveChangesAsync();
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(ingredient);
         }
+
 
         // GET: IngredientsController/Edit/5
         public ActionResult Edit(int id)

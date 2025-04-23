@@ -24,7 +24,29 @@
 			<div class="form-group mb-3">
 				<label asp-for="ImageUrl" class="control-label"></label>
 				<input asp-for="ImageUrl" class="form-control"></input>
+			</div
+
+            <div class="form-group mb-3">
+				<label asp-for="ImageUrl" class="control-label"></label>
+				<input asp-for="ImageUrl" class="form-control"></input>
 			</div>
+
+            <div class="form-group mb-3">
+				<label asp-for="Tags" class="control-label"></label>
+				<input asp-for="Tags" class="form-control"></input>
+			</div>
+
+			<div class="mb-3" id="ingredientsSection" >
+        <label>Добавьте ингредиенты</label>
+        <div style="position: relative;">
+            <input type="text" id="ingredientSearch" class="form-control"
+                placeholder="Поиск ингредиентов" autocomplete="off"
+                onkeydown="return handleEnter(event)" />
+            <div id="ingredientDropdown" class="dropdown-menu"
+                style="display:none; width:100%; position:absolute; z-index:1000;"></div>
+        </div>
+        
+    </div>
 
 			<div class="form-group mt-4">
 				<input type="submit" value="Create" class="btn btn-primary" />
