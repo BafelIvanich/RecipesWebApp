@@ -51,6 +51,20 @@
             }
         </div>
     </div>
+@* image loading *@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="UploadFridgeImage" asp-controller="Files" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="fridgeImage" class="form-label">Загрузите изображение</label>
+                    <input type="file" class="form-control" id="fridgeImage" name="fridgeImage" accept="image/*" required/>
+                </div>
+                <button type="submit" class="btn btn-primary">Обработать</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 
 </div>
