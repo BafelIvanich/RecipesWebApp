@@ -55,12 +55,15 @@
 <div class="col-md-4">
     <div class="card">
         <div class="card-body">
-            <form asp-action="UploadFridgeImage" asp-controller="Files" method="post" enctype="multipart/form-data">
+            <form asp-action="UploadFridgeImage" asp-controller="Files" method="post" enctype="multipart/form-data" id="uploadForm">
                 <div class="mb-3">
                     <label for="fridgeImage" class="form-label">Загрузите изображение</label>
                     <input type="file" class="form-control" id="fridgeImage" name="fridgeImage" accept="image/*" required/>
                 </div>
-                <button type="submit" class="btn btn-primary">Обработать</button>
+
+                <button type="submit" class="btn btn-primary" id="submitButton">
+                    <span class="button-text">Обработать</span>
+                </button>
             </form>
         </div>
     </div>
@@ -91,7 +94,7 @@
 
                         fridgeDropdown.innerHTML = filtered.map(ing => `
                             <a href="#" class="dropdown-item"
-                               data-name="${ing.name}"
+                               data-name="${ing.nameн}"
                                data-unit="${ing.unit}"
                                onclick="addFridgeIngredient('${ing.name}', '${ing.unit}')">
                                 ${ing.name} (${ing.unit})
@@ -107,6 +110,25 @@
                     fridgeDropdown.style.display = 'none';
                 }
             });
+
+            const uploadForm = document.getElementById('uploadForm');
+            const submitButton = document.getElementById('submitButton');
+
+            if(uploadForm && submitButton){
+                const buttonTextSpan = submitButton.querySelector('.button-text');
+
+                if(buttonTextSpan){
+                    uploadForm.addEventListener('submit',function(event){
+                        submitButton.disabled = true;
+                        buttonTextSpan.textContent = 'Обработка...';
+                    });
+                }
+            }
+
+
+
+
+
         });
 
         function addFridgeIngredient(name, unit) {
@@ -146,5 +168,6 @@
             }
             return true;
         }
+
     </script>
 }

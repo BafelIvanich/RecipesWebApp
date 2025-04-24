@@ -20,13 +20,17 @@ namespace RecipesApp.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly string pythonPath = null;
         private readonly string pythonScriptPath = null;
+        private readonly ApplicationDbContext _context;
+
 
         private readonly ILogger<FilesController> _logger;
 
-        public FilesController(ILogger<FilesController> logger,IWebHostEnvironment env)
+        public FilesController(ILogger<FilesController> logger,IWebHostEnvironment env, ApplicationDbContext context)
         {
             _logger = logger;
             _env = env;
+            _context = context;
+
 
             pythonPath = Path.Combine(_env.ContentRootPath, "PythonScripts", "venv","Scripts","python.exe");
             pythonScriptPath = Path.Combine(_env.ContentRootPath, "PythonScripts","process_image.py");
