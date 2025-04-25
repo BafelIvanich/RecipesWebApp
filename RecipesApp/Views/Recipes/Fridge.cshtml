@@ -1,5 +1,5 @@
 ﻿@using RecipesApp.ViewModels
-@model List<IngredientViewModel>
+@model FridgeViewModel
 
 @{
     ViewData["Title"] = "Fridge";
@@ -24,11 +24,11 @@
             <div class="card-header">
                 Ваш холодильник
                 <a asp-action="Search" asp-route-useFridge="true" class="btn btn-sm btn-recipe float-end">
-                     Что приготовить?
+                    Что приготовить?
                 </a>
             </div>
             <ul id="fridgeIngredientList" class="list-group list-group-flush">
-                @foreach (var item in Model)
+                @foreach (var item in Model.fridgeItems)
                 {
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
@@ -43,33 +43,75 @@
                 }
             </ul>
 
-            @if (!Model.Any())
+            @if (!Model.fridgeItems.Any())
             {
                 <div class="card-body">
                     <p class="text-muted mb-0">В вашем холодильнике пока ничего нет.</p>
                 </div>
             }
         </div>
-    </div>
-@* image loading *@
-<div class="col-md-4">
-    <div class="card">
-        <div class="card-body">
-            <form asp-action="UploadFridgeImage" asp-controller="Files" method="post" enctype="multipart/form-data" id="uploadForm">
-                <div class="mb-3">
-                    <label for="fridgeImage" class="form-label">Загрузите изображение</label>
-                    <input type="file" class="form-control" id="fridgeImage" name="fridgeImage" accept="image/*" required/>
-                </div>
 
-                <button type="submit" class="btn btn-primary" id="submitButton">
-                    <span class="button-text">Обработать</span>
-                </button>
-            </form>
+
+
+
+    </div>
+
+
+    @* image loading *@
+    <div class="col-md-4 mt-4">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="UploadFridgeImage" asp-controller="Files" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-3">
+                        <label for="fridgeImage" class="form-label">Загрузите изображение</label>
+                        <input type="file" class="form-control" id="fridgeImage" name="fridgeImage" accept="image/*" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitButton">
+                        <span class="button-text">Обработать</span>
+                    </button>
+                </form>
+            </div>
         </div>
+
+        @if (TempData["Processed"] as bool? == true)
+        {
+            <div class="mt-4">
+                @if (Model.matching != null && Model.matching.Any())
+                {
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            Найдены в базе данных
+                        </div>
+                        <ul class="list-group list-group-flush" id="matched-items-list">
+                            @foreach (var item in Model.matching)
+                            {
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center" data-item-name="@item">
+                                    <span>@item</span>
+                                </li>
+
+                            }
+                        </ul>
+                    </div>
+                }
+                @if (Model.missing != null && Model.missing.Any())
+                {
+                    <div class="card mb-3">
+                        <div class="card-header bg-danger text-light">
+                            Не распознаны в базе данных
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.missing)
+                            {
+                                <li class="list-group-item">@item</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        }
     </div>
-</div>
-
-
 </div>
 
 @section Scripts {
@@ -87,14 +129,14 @@
                         const response = await fetch(`/Recipes/SearchIngredients?term=${encodeURIComponent(term)}`);
                         const ingredients = await response.json();
 
-                        const existing = @Html.Raw(Json.Serialize(Model.Select(i => i.Name.ToLower())));
+                        const existing = @Html.Raw(Json.Serialize(Model.fridgeItems.Select(i => i.Name.ToLower())));
                         const filtered = ingredients.filter(ing =>
                             !existing.includes(ing.name.toLowerCase())
                         );
 
                         fridgeDropdown.innerHTML = filtered.map(ing => `
                             <a href="#" class="dropdown-item"
-                               data-name="${ing.nameн}"
+                               data-name="${ing.name}"
                                data-unit="${ing.unit}"
                                onclick="addFridgeIngredient('${ing.name}', '${ing.unit}')">
                                 ${ing.name} (${ing.unit})
@@ -110,25 +152,6 @@
                     fridgeDropdown.style.display = 'none';
                 }
             });
-
-            const uploadForm = document.getElementById('uploadForm');
-            const submitButton = document.getElementById('submitButton');
-
-            if(uploadForm && submitButton){
-                const buttonTextSpan = submitButton.querySelector('.button-text');
-
-                if(buttonTextSpan){
-                    uploadForm.addEventListener('submit',function(event){
-                        submitButton.disabled = true;
-                        buttonTextSpan.textContent = 'Обработка...';
-                    });
-                }
-            }
-
-
-
-
-
         });
 
         function addFridgeIngredient(name, unit) {
@@ -168,6 +191,5 @@
             }
             return true;
         }
-
     </script>
 }

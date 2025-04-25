@@ -21,7 +21,7 @@ namespace RecipesApp.ViewModels
 
     public class RecipeSearchResult
     {
-        public Recipe Recipe { get; set; }
+        public Recipe? Recipe { get; set; }
         public List<string> MatchedIngredients { get; set; } = new();
         public List<string> MissingIngredients { get; set; } = new();
     }

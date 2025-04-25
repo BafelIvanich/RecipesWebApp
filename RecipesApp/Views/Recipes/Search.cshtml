@@ -177,10 +177,6 @@ else if (Context.Request.QueryString.HasValue)
             background: transparent;
         }
 
-        .card-hover:hover::before {
-            animation: warp 1.5s infinite linear;
-        }
-
     
     .card-img-top {
         margin: 4px;
@@ -194,34 +190,7 @@ else if (Context.Request.QueryString.HasValue)
         margin: 2px;
     }
 
-    @@keyframes warp {
-        
-        0%
 
-    {
-        transform: scale(1);
-        border-radius: 8px;
-    }
-
-    25% {
-        transform: scale(1.01, 1.005);
-        border-radius: 9px;
-    }
-
-    50% {
-        transform: scale(1.005, 1.01);
-        border-radius: 10px;
-    }
-
-    75% {
-        transform: scale(1.01, 1.005);
-        border-radius: 9px;
-    }
-
-    100% {
-        transform: scale(1);
-        border-radius: 8px;
-    }
 
     }
 </style>

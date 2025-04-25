@@ -6,7 +6,8 @@ import openai
 import requests, base64
 from openai import AsyncOpenAI
 
-api_key = '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'
+
+api_key = ''
 invoke_url = "https://integrate.api.nvidia.com/v1/chat/completions"
 stream = False
 
@@ -30,7 +31,7 @@ def process_image(image_path):
             "messages": [
                 {
                     "role": "user",
-                    "content": f'{"Перечисли все продукты, изображенные на картинке через запятую. Больше ничего не пиши."} <img src="data:image/png;base64,{image_b64}" />'
+                    "content": f'{"Перечисли все продукты, изображенные на картинке через запятую. Больше ничего не пиши. Используй только существительные в единственном числе. Если на изображении отсутствуют продукты напиши Ничего. Не ставь точку в конце"} <img src="data:image/png;base64,{image_b64}" />'
                 }
             ],
             "max_tokens": 512,

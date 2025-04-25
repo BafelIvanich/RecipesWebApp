@@ -11,15 +11,18 @@ using RecipesApp.Extensions;
 using System.Net.WebSockets;
 using System.Runtime.InteropServices;
 using RecipesApp.ViewModels;
+using System.Text.Json;
 
 namespace RecipesApp.Controllers
 {
     public class RecipesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<FilesController> _logger;
 
-        public RecipesController(ApplicationDbContext context)
+        public RecipesController(ILogger<FilesController> logger,ApplicationDbContext context)
         {
+            _logger = logger;
             _context = context;
 
         }
@@ -181,7 +184,43 @@ namespace RecipesApp.Controllers
         {
             var fridgeIngredients = HttpContext.Session.Get<List<IngredientViewModel>>("Fridge")
                 ?? new List<IngredientViewModel>();
-            return View(fridgeIngredients);
+
+            List<string> matched = new List<string>();
+            List<string> unmatched = new List<string>();
+            bool processed = TempData["Processed"] as bool? ?? false;
+
+            if (TempData["MatchedIngredients"] is string matchedJson)
+            {
+                try
+                {
+                    matched = JsonSerializer.Deserialize<List<string>>(matchedJson) ?? new List<string>();
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "failed to deserialize");
+                }
+            }
+
+            if (TempData["UnmatchedIngredients"] is string unmatchedJson)
+            {
+                try
+                {
+                    unmatched = JsonSerializer.Deserialize<List<string>>(unmatchedJson) ?? new List<string>();
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "failed to deserialize");
+                }
+            }
+
+            var viewModel = new FridgeViewModel
+            {
+                fridgeItems = fridgeIngredients,
+                matching = matched,
+                missing = unmatched
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
@@ -199,6 +238,31 @@ namespace RecipesApp.Controllers
                 });
                 HttpContext.Session.Set("Fridge", fridge);
             }
+
+            return RedirectToAction("Fridge");
+
+        }
+
+        [HttpPost]
+        public IActionResult AddToFridgeImage(AddToFridgeRequest request)
+        {
+
+            if (request == null)
+            {
+                return RedirectToAction("Fridge");
+            }
+
+            var fridge = HttpContext.Session.Get<List<IngredientViewModel>>("Fridge")
+        ?? new List<IngredientViewModel>();
+
+            string name = request.Name.Trim();
+            string nameTrimmedLower = name.ToLowerInvariant();
+
+            fridge.Add(new IngredientViewModel
+            {
+                Name = name, // Use the original casing from the request
+                Unit = "ед"
+            });
 
             return RedirectToAction("Fridge");
         }

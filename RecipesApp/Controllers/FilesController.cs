@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using RecipesApp.ViewModels;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using System.Text.Json;
 
 namespace RecipesApp.Controllers
 {
@@ -91,16 +92,58 @@ namespace RecipesApp.Controllers
                         try { process.Kill(true); } catch { }
                         throw new TimeoutException($"Время обработки запроса истекло");
                     }
+
+                    if (process.ExitCode != 0)
+                    {
+                        return RedirectToAction("Fridge", "Recipes");
+                    }
+
                     pythonResult = await outputTask;
                     pythonError = await errorTask;
 
                     if (!string.IsNullOrEmpty(pythonError)) _logger.LogWarning($"python errors:{pythonError}");
                     if (!string.IsNullOrEmpty(pythonResult)) _logger.LogInformation($"python script returned:{pythonResult}");
-                    string outputResult = pythonResult.Trim();
-                    string errorResult = pythonError.Trim();
-                    _logger.LogInformation($"получено: {outputResult}");
-                    _logger.LogInformation($"ошибка: {errorResult}");
+
+                    var ingredientItems = pythonResult.Split(',');
+                    if (ingredientItems.Contains("Ничего"))
+                    {
+                        return RedirectToAction("Fridge", "Recipes");
+                    }
+                    var dbIngredients = await _context.Ingredients
+                        .Select(i => i.Name.ToLowerInvariant())
+                        .ToListAsync();
+                    var dbIngredientsSet = new HashSet<string>(dbIngredients);
+
+                    List<string> matched = new List<string>();
+                    List<string> unmatched = new List<string>();
+
+                    foreach(var item in ingredientItems)
+                    {
+                        if (string.IsNullOrWhiteSpace(item)) continue;
+
+                        string formattedItem = item.Trim().ToLowerInvariant();
+                        if (dbIngredientsSet.Contains(formattedItem))
+                        {
+                            var matchingItem = await _context.Ingredients
+                                .Where(i => i.Name != null && i.Name.ToLower().Contains(formattedItem))
+                                .Select(i => i.Name)
+                                .FirstOrDefaultAsync();
+                            matched.Add(matchingItem ?? item.Trim());
+                        }
+                        else
+                        {
+                            unmatched.Add(item.Trim());
+                        }
+                    }
+
+                    _logger.LogInformation($"Matched:{matched.Count}");
+                    _logger.LogInformation($"Unmatched:{unmatched.Count}");
+
+                    TempData["MatchedIngredients"] = JsonSerializer.Serialize(matched);
+                    TempData["UnmatchedIngredients"] = JsonSerializer.Serialize(unmatched);
+                    TempData["Processed"] = true;
                 }
+
 
                 return RedirectToAction("Fridge", "Recipes");
             }
@@ -126,6 +169,19 @@ namespace RecipesApp.Controllers
             }
 
             
+        }
+        public async Task<bool> DoesIngredientExist(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
+            string formatedName = name.Trim().ToLowerInvariant();
+
+            bool exists = await _context.Ingredients.AnyAsync(ing => ing.Name.ToLower() == formatedName);
+
+            return exists;
         }
 
     }
